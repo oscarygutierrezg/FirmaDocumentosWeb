@@ -47,8 +47,8 @@ public class ListarDocumentosOPIntegracion extends EndpointIntegracion {
                     DocumentoVO documentoVO = new DocumentoVO();
                     documentoVO.setIdItemOfertaEconomica(quoteItem.getId());
                     documentoVO.setIdOfertaEconomicaPadre(quoteItem.getQuoteId());
-                    documentoVO.setFlagFirmaDigital("Y");
-                    //documentoVO.setFlagFirmaDigital(action.getOCSFirmaDigitalFlag());
+                    //documentoVO.setFlagFirmaDigital("Y");
+                    documentoVO.setFlagFirmaDigital(action.getOCSFirmaDigitalFlag());
                     documentoVO.setIdActividad(action.getId());
                     documentoVO.setIdDocumento(action.getOCSIdDocumento());
                     documentoVO.setIdItemOfertaEconomPadre(action.getParentActivityId());

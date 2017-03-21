@@ -95,7 +95,7 @@ public class MbFirma implements Serializable {
 
     public void consultarDocumentos() {
         System.out.println("consultarDocumentos");
-        if(documentos!=null){
+        if (documentos != null) {
             documentos.clear();
         }
         mostrarErrorListar = false;
@@ -108,24 +108,23 @@ public class MbFirma implements Serializable {
         }
         ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
         System.out.println("idOferta " + ofertaEconomica);
-        if (ofertaEconomica==null || ofertaEconomica.isEmpty()) {
-            mostrarErrorListar=true;
-            mostrarBotonOKErrorListar=true;            
-            mensajeErrorListar="El identificador de la oferta económica no fue ingresado como parámetro por la url. Debe ingresarla y refrescar";
+        if (ofertaEconomica == null || ofertaEconomica.isEmpty()) {
+            mostrarErrorListar = true;
+            mostrarBotonOKErrorListar = true;
+            mensajeErrorListar = "El identificador de la oferta económica no fue ingresado como parámetro por la url. Debe ingresarla y refrescar";
             return;
         }
 
         int contadorFirmados = 0;
         try {
-            
 
-            ListarDocumentosVO listarDocumentosVO = documentosController.listDocsINOperation(ofertaEconomica);    
-            System.out.println("listarDocumentosVO "+listarDocumentosVO);
+            ListarDocumentosVO listarDocumentosVO = documentosController.listDocsINOperation(ofertaEconomica);
+            System.out.println("listarDocumentosVO " + listarDocumentosVO);
             if (listarDocumentosVO != null) {
                 documentos = listarDocumentosVO.getDocumentos();
-                 System.out.println("documentos "+documentos.size());
-                if(documentos.size()==0){    
-                    mensajeFirmados="La oferta económica "+ofertaEconomica+" no tiene documentos asociados.";
+                System.out.println("documentos " + documentos.size());
+                if (documentos.size() == 0) {
+                    mensajeFirmados = "La oferta económica " + ofertaEconomica + " no tiene documentos asociados.";
                     mostrarFirmados = true;
                     return;
                 }
@@ -134,6 +133,10 @@ public class MbFirma implements Serializable {
                 String idActividad = (String) session.getAttribute("idActividad");
                 System.out.println("idActividad " + idActividad);
                 for (DocumentoVO documento : documentos) {
+                    System.out.println("Antes getIdDocumento " + documento.getIdDocumento());
+                    if (documento.getIdDocumento() == null || documento.getIdDocumento().isEmpty()) {
+                        documento.setFlagFirmaDigital("N");
+                    }
                     if (documento.getFlagFirmaDigital().compareTo("N") == 0) {
                         contadorFirmados++;
                     }
@@ -144,20 +147,20 @@ public class MbFirma implements Serializable {
                     }
                 }
                 if (contadorFirmados == documentos.size()) {
-                    mensajeFirmados="Todos los documentos asociados a la oferta económica "+ofertaEconomica+" estan firmados.";
+                    mensajeFirmados = "Todos los documentos asociados a la oferta económica " + ofertaEconomica + " estan firmados.";
                     mostrarFirmados = true;
                 }
             }
         } catch (Exception ex) {
             ex.printStackTrace();
-            mensajeErrorListar="Error interno al tratar de consultar los documentos asociados a la oferta económica "+ofertaEconomica+ " \n ¿Confirma que desea realizar el reintento del proceso listar documentos?.";
+            mensajeErrorListar = "Error interno al tratar de consultar los documentos asociados a la oferta económica " + ofertaEconomica + " \n ¿Confirma que desea realizar el reintento del proceso listar documentos?.";
             mostrarErrorListar = true;
         }
     }
 
     public String rollback() {
         System.out.println("rollback");
-        return "index?faces-redirect=true&ofertaEconomica="+ofertaEconomica;
+        return "index?faces-redirect=true&ofertaEconomica=" + ofertaEconomica;
     }
 
     public String firmar() {
@@ -170,7 +173,7 @@ public class MbFirma implements Serializable {
         if (detalleDocumentoVO == null) {
             mostrarErrorFirmar = true;
             mensajeErrorFirmar = "Error interno no se ha podido detectar el docuemento que se va a firmar";
-            return "index?faces-redirect=true&ofertaEconomica="+ofertaEconomica;
+            return "index?faces-redirect=true&ofertaEconomica=" + ofertaEconomica;
         }
 
         boolean errorFirmar = false;
@@ -187,7 +190,7 @@ public class MbFirma implements Serializable {
 
         if (errorFirmar) {
             mostrarErrorFirmar = true;
-            return "index?faces-redirect=true&ofertaEconomica="+ofertaEconomica;
+            return "index?faces-redirect=true&ofertaEconomica=" + ofertaEconomica;
         }
 
         errorFirmar = false;
@@ -219,7 +222,7 @@ public class MbFirma implements Serializable {
 
         if (errorFirmar) {
             mostrarErrorFirmar = true;
-            return "index?faces-redirect=true&ofertaEconomica="+ofertaEconomica;
+            return "index?faces-redirect=true&ofertaEconomica=" + ofertaEconomica;
         }
 
         errorFirmar = false;
@@ -239,7 +242,7 @@ public class MbFirma implements Serializable {
         if (errorFirmar) {
             mostrarErrorFirmar = true;
         }
-        return "index?faces-redirect=true&ofertaEconomica="+ofertaEconomica;
+        return "index?faces-redirect=true&ofertaEconomica=" + ofertaEconomica;
     }
 
     public void consultarDetalleDocumento(String idActividad) {
@@ -287,8 +290,6 @@ public class MbFirma implements Serializable {
     public void setMensajeFirmados(String mensajeFirmados) {
         this.mensajeFirmados = mensajeFirmados;
     }
-    
-    
 
     public ConfirmFirmaController getConfirmFirmaController() {
         return confirmFirmaController;
@@ -313,8 +314,6 @@ public class MbFirma implements Serializable {
     public void setMensajeErrorListar(String mensajeErrorListar) {
         this.mensajeErrorListar = mensajeErrorListar;
     }
-    
-    
 
     public boolean isMostrarErrorFirmar() {
         return mostrarErrorFirmar;
@@ -339,8 +338,6 @@ public class MbFirma implements Serializable {
     public void setMostrarBotonOKErrorListar(boolean mostrarBotonOKErrorListar) {
         this.mostrarBotonOKErrorListar = mostrarBotonOKErrorListar;
     }
-    
-    
 
     public boolean isErrorCargaDocumentos() {
         return errorCargaDocumentos;

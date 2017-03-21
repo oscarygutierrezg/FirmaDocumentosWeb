@@ -31,12 +31,14 @@
                 $('#formDocumentos\\:estadoCargaVista').val(document.myApplet.getStatusVista());
 
                 if (!document.myApplet.getStatusInicioApplet() || !document.myApplet.getStatusRegistro() || !document.myApplet.getStatusVista()) {
+                    $('#divApplet').hide();
                     $('#notificacionErrorApplet').modal('show');
                 }
             }
 
             function errorInitSecuGen() {
                 // Metodo que se invoca cuando ha ocurrido un error al iniciar el lector de huellas
+                $('#divApplet').hide();
                 $('#notificacionErrorApplet').modal('show');
             }
 
@@ -134,19 +136,22 @@
                         document.getElementById("btnFirmaV").disabled = false;
                     } else {
                         $('#formNotificacionError\\:descNotificacionError').text('No puedo firmar documentos con la cédula vencida');
+                        $('#divApplet').hide();
                         $('#notificacionError').modal('show');
                     }
                 } else {
                     $('#formNotificacionError\\:descNotificacionError').text('La cédula no corresponde con la huella ingresada');
+                    $('#divApplet').hide();
                     $('#notificacionError').modal('show');
                 }
             }
 
             function validacionFirma() {
-                if (validarSeleccionDocumento()) {               
+                if (validarSeleccionDocumento()) {
                     $('#formDocumentos\\:btnFirma').trigger('click');
                 } else {
                     $('#formNotificacionError\\:descNotificacionError').text('Para poder firmar debe seleccionar al menos un documento');
+                    $('#divApplet').hide();
                     $('#notificacionError').modal('show');
                 }
             }
@@ -196,6 +201,7 @@
                     case 'success':
                         $('body').removeClass("loading");
                         if ($('#formDocumentos\\:mostrarErrorConsultarDetalle').val() == 'true') {
+                            $('#divApplet').hide();
                             $('#notificacionErrorConsultarDetalle').modal('show');
                         }
                         break;
@@ -245,7 +251,7 @@
                                         <h:inputHidden id="mostrarErrorConsultarDetalle" value="#{MbFirma.mostrarErrorConsultarDetalle}"/>
                                     </div>
                                     <br />
-                                    <div class="row">
+                                    <div id="divApplet" class="row">
                                         <applet code="jtoc\v3\Main" name="myApplet" archive="jtocv3.jar" width="540" height="160">
                                             <PARAM name="URLTOC" value="http://web.tocbiometrics.com/tocwebsv/ver3/wsTOC3.php" />
                                             <PARAM name="URLNUEVACI" value="http://web.tocbiometrics.com/tocwebsv/wsTOCNewCI.php" />
@@ -261,10 +267,9 @@
 
                                 </div>
                                 <div class="col-lg-7 col-md-7 col-sm-7 ">
-                                    <h5 class="panel-title" style="margin-left: -15px">Documentos Pendientes</h5>
-                                    <div class="row pre-scrollable" style="max-height: 160px;">
-
-                                        <h:dataTable styleClass="table table-bordered" style="font-size: 10px;" id="tableDocumentos" value="#{MbFirma.documentos}" var="o" >
+                                    <h5 class="panel-title" style="margin-left: -15px">Documentos Pendientes</h5> 
+                                    <div class="row pre-scrollable" style="max-height: 190px;">
+                                        <h:dataTable styleClass="table table-striped" style="font-size: 10px; margin-top: 33px;" id="tableDocumentos" value="#{MbFirma.documentos}" var="o" >
                                             <h:column>
                                                 <f:facet name="header">
                                                     Seleccione
@@ -330,7 +335,7 @@
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <a href="#" class="btn btn-primary" onclick="$('#notificacionError').modal('hide')">Aceptar</a>
+                            <a href="#" class="btn btn-primary" onclick="$('#divApplet').show();$('#notificacionError').modal('hide')">Aceptar</a>
                         </div>
                     </div>
                 </div>
@@ -358,9 +363,9 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <a href="#" class="btn btn-primary" onclick="$('#notificacionRollback').modal('hide');
+                        <a href="#" class="btn btn-primary" onclick="$('#divApplet').show();$('#notificacionRollback').modal('hide');
                                 $('#formDocumentos\\:btnRollback').trigger('click');">Si</a>
-                        <a href="#" class="btn btn-primary" onclick="$('#notificacionRollback').modal('hide')">No</a>
+                        <a href="#" class="btn btn-primary" onclick="$('#divApplet').show();$('#notificacionRollback').modal('hide')">No</a>
                     </div>
                 </div>
             </div>
@@ -386,7 +391,7 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <a href="#" class="btn btn-primary" onclick="$('#notificacionFirmados').modal('hide');
+                        <a href="#" class="btn btn-primary" onclick="$('#divApplet').show();$('#notificacionFirmados').modal('hide');
                                 window.close()">Aceptar</a>
                     </div>
                 </div>
@@ -413,7 +418,7 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <a href="#" class="btn btn-primary" onclick="$('#notificacionErrorApplet').modal('hide');
+                        <a href="#" class="btn btn-primary" onclick="$('#divApplet').show();$('#notificacionErrorApplet').modal('hide');
                                 window.close()">Aceptar</a>  
                     </div>
                 </div>
@@ -443,11 +448,11 @@
                     </div>
                     <div class="modal-footer">
                         <h:panelGroup rendered="#{not MbFirma.mostrarBotonOKErrorListar}">
-                            <a href="index.xhtml" class="btn btn-primary" onclick="$('#notificacionErrorListar').modal('hide');">Si</a>
-                            <a href="#" class="btn btn-primary" onclick="$('#notificacionErrorListar').modal('hide');closeWindow()">No</a>
+                            <a href="index.xhtml" class="btn btn-primary" onclick="$('#divApplet').show();$('#notificacionErrorListar').modal('hide');">Si</a>
+                            <a href="#" class="btn btn-primary" onclick="$('#divApplet').show();$('#notificacionErrorListar').modal('hide');closeWindow()">No</a>
                         </h:panelGroup>
                         <h:panelGroup rendered="#{MbFirma.mostrarBotonOKErrorListar}">
-                            <a href="#" class="btn btn-primary" onclick="$('#notificacionErrorListar').modal('hide')">OK</a>
+                            <a href="#" class="btn btn-primary" onclick="$('#divApplet').show();$('#notificacionErrorListar').modal('hide')">OK</a>
                         </h:panelGroup>
                     </div>
                 </div>
@@ -474,8 +479,8 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <a href="#" class="btn btn-primary" onclick="$('#notificacionErrorFirmar').modal('hide');$('#formDocumentos\\:btnFirma').trigger('click')">Si</a>
-                        <a href="#" class="btn btn-primary" onclick="$('#notificacionErrorFirmar').modal('hide')">No</a>
+                        <a href="#" class="btn btn-primary" onclick="$('#divApplet').show();$('#notificacionErrorFirmar').modal('hide');$('#formDocumentos\\:btnFirma').trigger('click')">Si</a>
+                        <a href="#" class="btn btn-primary" onclick="$('#divApplet').show();$('#notificacionErrorFirmar').modal('hide')">No</a>
                     </div>
                 </div>
             </div>
@@ -500,26 +505,29 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <a href="#" class="btn btn-primary" onclick="$('#notificacionErrorConsultarDetalle').modal('hide');
+                        <a href="#" class="btn btn-primary" onclick="$('#divApplet').show();$('#notificacionErrorConsultarDetalle').modal('hide');
                                 clickarCheck()">Si</a>
-                        <a href="#" class="btn btn-primary" onclick="$('#notificacionErrorConsultarDetalle').modal('hide')">No</a>
+                        <a href="#" class="btn btn-primary" onclick="$('#divApplet').show();$('#notificacionErrorConsultarDetalle').modal('hide')">No</a>
                     </div>
                 </div>
             </div>
         </div>
-        
+
         <div class="modal1"><h5>Estamos procesando su solicitud por favor espere...</h5></div>
 
         <script>
             $(document).ready(function () {
-                
+
                 if (#{MbFirma.mostrarFirmados}) {
+                    $('#divApplet').hide()
                     $('#notificacionFirmados').modal('show');
                 }
                 if (#{MbFirma.mostrarErrorListar}) {
+                    $('#divApplet').hide()
                     $('#notificacionErrorListar').modal('show');
                 }
                 if (#{MbFirma.mostrarErrorFirmar}) {
+                    $('#divApplet').hide()
                     $('#notificacionErrorFirmar').modal('show');
                 }
             });
