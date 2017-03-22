@@ -115,7 +115,7 @@ public class MbFirma implements Serializable {
             return;
         }
 
-        int contadorFirmados = 0;
+        
         try {
 
             ListarDocumentosVO listarDocumentosVO = documentosController.listDocsINOperation(ofertaEconomica);
@@ -132,13 +132,18 @@ public class MbFirma implements Serializable {
                 HttpSession session = (HttpSession) ec.getSession(true);
                 String idActividad = (String) session.getAttribute("idActividad");
                 System.out.println("idActividad " + idActividad);
+                int contadorFirmados = 0;
+                int contadorImposibleFirmar = 0;
                 for (DocumentoVO documento : documentos) {
                     System.out.println("Antes getIdDocumento " + documento.getIdDocumento());
                     if (documento.getIdDocumento() == null || documento.getIdDocumento().isEmpty()) {
-                        documento.setFlagFirmaDigital("N");
+                        documento.setFlagFirmaDigital("I");
                     }
                     if (documento.getFlagFirmaDigital().compareTo("N") == 0) {
                         contadorFirmados++;
+                    }
+                    if (documento.getFlagFirmaDigital().compareTo("I") == 0) {
+                        contadorImposibleFirmar++;
                     }
                     if (idActividad != null) {
                         if (documento.getIdActividad().compareTo(idActividad) == 0) {
@@ -148,6 +153,10 @@ public class MbFirma implements Serializable {
                 }
                 if (contadorFirmados == documentos.size()) {
                     mensajeFirmados = "Todos los documentos asociados a la oferta económica " + ofertaEconomica + " estan firmados.";
+                    mostrarFirmados = true;
+                }
+                if (contadorImposibleFirmar == documentos.size()) {
+                    mensajeFirmados = "Ninguno de los documentos asociados a la oferta económica " + ofertaEconomica + " se pueden firmar debido a que no tienen archivo asociado.";
                     mostrarFirmados = true;
                 }
             }
@@ -245,11 +254,12 @@ public class MbFirma implements Serializable {
         return "index?faces-redirect=true&ofertaEconomica=" + ofertaEconomica;
     }
 
-    public void consultarDetalleDocumento(String idActividad) {
+    public void consultarDetalleDocumento(String idActividad,String flagFirma) {
         System.out.println("consultarDetalleDocumento");
         mostrarErrorConsultarDetalle = false;
         try {
             System.out.println("idActividad " + idActividad);
+            System.out.println("flagFirma " + flagFirma);
 
             detalleDocumentoVO = detalleRepController.detalleRepINOperation(idActividad);
 
@@ -261,6 +271,23 @@ public class MbFirma implements Serializable {
             FacesContext context = FacesContext.getCurrentInstance();
             HttpSession session = (HttpSession) context.getExternalContext().getSession(true);
             session.setAttribute("idActividad", idActividad);
+            session.setAttribute("firmado", flagFirma);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            mostrarErrorConsultarDetalle = true;
+        }
+    }
+    
+     public void consultarDetalleDocumentoI(String idActividad,String flagFirma) {
+        System.out.println("consultarDetalleDocumentoI");
+        mostrarErrorConsultarDetalle = false;
+        try {
+            System.out.println("idActividad " + idActividad);
+            System.out.println("flagFirma " + flagFirma);
+            FacesContext context = FacesContext.getCurrentInstance();
+            HttpSession session = (HttpSession) context.getExternalContext().getSession(true);
+            session.setAttribute("idActividad", idActividad);
+            session.setAttribute("flagFirma", flagFirma);
         } catch (Exception ex) {
             ex.printStackTrace();
             mostrarErrorConsultarDetalle = true;

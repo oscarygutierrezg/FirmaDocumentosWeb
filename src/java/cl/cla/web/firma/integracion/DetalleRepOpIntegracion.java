@@ -1,6 +1,5 @@
 package cl.cla.web.firma.integracion;
 
-
 import cl.cla.web.firma.vo.DetalleDocumentoVO;
 import cl.cla.web.firma.vo.ResponseVO;
 import com.siebel.fins.OCSDetalledeDocumentosWS;
@@ -15,22 +14,23 @@ import javax.faces.context.FacesContext;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Holder;
 
-public class DetalleRepOpIntegracion{
+public class DetalleRepOpIntegracion {
 
-      private String endPoint;
+    private String endPoint;
 
     public DetalleRepOpIntegracion() {
         Properties properties = new Properties();
         try {
             properties.load(FacesContext.getCurrentInstance().getExternalContext().getResourceAsStream("/WEB-INF/properties/wsdlEndpoint.properties"));
-            endPoint=properties.getProperty("detalle");
+            endPoint = properties.getProperty("detalle");
         } catch (IOException ex) {
             ex.printStackTrace();
         }
     }
+
     public DetalleRepOpIntegracion(String endPoint) {
-        this.endPoint=endPoint;
-    
+        this.endPoint = endPoint;
+
     }
 
     public DetalleDocumentoVO detalleRepINOperation(String idActividad) throws Exception, Exception {

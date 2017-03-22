@@ -55,23 +55,29 @@ public class ServletDetalleDocumentoPdf extends HttpServlet {
         OutputStream responseOutputStream = null;
         try {
             String actividad = request.getParameter("actividad") != null ? request.getParameter("actividad") : "";
+            String flagFirma = request.getParameter("flagFirma") != null ? request.getParameter("flagFirma") : "";
             System.out.println("idActividad " + actividad);
+            System.out.println("flagFirma " + flagFirma);
             byte[] encoded = null;
-            if (actividad != null && !actividad.isEmpty()) {
-                try {
-                    DetalleDocumentoVO detalleDocumentoVO = detalleRepController.detalleRepINOperation(actividad);
-                    encoded = detalleDocumentoVO.getArchivo();
-                } catch (Exception ex) {
+            if (flagFirma != null && !flagFirma.isEmpty()) {
+                encoded = Base64.decodeBase64(generarBase64Vacio());
+            } 
+            else {
+                if (actividad != null && !actividad.isEmpty()) {
+                    try {
+                        DetalleDocumentoVO detalleDocumentoVO = detalleRepController.detalleRepINOperation(actividad);
+                        encoded = detalleDocumentoVO.getArchivo();
+                    } catch (Exception ex) {
+                        encoded = Base64.decodeBase64(generarBase64Vacio());
+                    }
+                } else {
                     encoded = Base64.decodeBase64(generarBase64Vacio());
                 }
-            } else {
-                encoded = Base64.decodeBase64(generarBase64Vacio());
             }
-
             pdfFile = new File(actividad + ".pdf");
             FileUtils.writeByteArrayToFile(pdfFile, encoded);
             response.setContentType("application/pdf");
-            response.addHeader("Content-Disposition", "inline; filename="+actividad+".pdf");
+            response.addHeader("Content-Disposition", "inline; filename=" + actividad + ".pdf");
             response.setContentLength((int) pdfFile.length());
 
             fileInputStream = new FileInputStream(pdfFile);

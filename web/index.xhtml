@@ -31,6 +31,7 @@
                 $('#formDocumentos\\:estadoCargaVista').val(document.myApplet.getStatusVista());
 
                 if (!document.myApplet.getStatusInicioApplet() || !document.myApplet.getStatusRegistro() || !document.myApplet.getStatusVista()) {
+                    $('#iframePdf').hide();
                     $('#divApplet').hide();
                     $('#notificacionErrorApplet').modal('show');
                 }
@@ -38,6 +39,7 @@
 
             function errorInitSecuGen() {
                 // Metodo que se invoca cuando ha ocurrido un error al iniciar el lector de huellas
+                $('#iframePdf').hide();
                 $('#divApplet').hide();
                 $('#notificacionErrorApplet').modal('show');
             }
@@ -136,22 +138,25 @@
                         document.getElementById("btnFirmaV").disabled = false;
                     } else {
                         $('#formNotificacionError\\:descNotificacionError').text('No puedo firmar documentos con la cédula vencida');
+                        $('#iframePdf').hide();
                         $('#divApplet').hide();
                         $('#notificacionError').modal('show');
                     }
                 } else {
                     $('#formNotificacionError\\:descNotificacionError').text('La cédula no corresponde con la huella ingresada');
+                    $('#iframePdf').hide();
                     $('#divApplet').hide();
                     $('#notificacionError').modal('show');
                 }
             }
 
             function validacionFirma() {
+                $('#iframePdf').hide();
+                $('#divApplet').hide();
                 if (validarSeleccionDocumento()) {
                     $('#formDocumentos\\:btnFirma').trigger('click');
                 } else {
                     $('#formNotificacionError\\:descNotificacionError').text('Para poder firmar debe seleccionar al menos un documento');
-                    $('#divApplet').hide();
                     $('#notificacionError').modal('show');
                 }
             }
@@ -173,6 +178,8 @@
             }
 
             function checkarCheck(id) {
+                $('#iframePdf').hide();
+                $('#divApplet').hide();
                 $('body').addClass("loading");
                 $('#formDocumentos\\:linkActivo').val(id);
 
@@ -200,7 +207,10 @@
                 switch (data.status) {
                     case 'success':
                         $('body').removeClass("loading");
+                        $('#iframePdf').show();
+                        $('#divApplet').show();
                         if ($('#formDocumentos\\:mostrarErrorConsultarDetalle').val() == 'true') {
+                            $('#iframePdf').hide();
                             $('#divApplet').hide();
                             $('#notificacionErrorConsultarDetalle').modal('show');
                         }
@@ -275,17 +285,20 @@
                                                     Seleccione
                                                 </f:facet>
                                                 <h:selectBooleanCheckbox rendered="#{o.flagFirmaDigital=='Y'}" value="#{o.seleccionado}" onclick="enlazarLink(#{o.id})" styleClass="check#{o.id}"/>
-                                                <h:selectBooleanCheckbox rendered="#{o.flagFirmaDigital=='N'} " value="#{o.seleccionado}" onclick="enlazarLink(#{o.id})" styleClass="check#{o.id}"/>
+                                                <h:selectBooleanCheckbox disabled="true" rendered="#{o.flagFirmaDigital=='N' or o.flagFirmaDigital=='I' } " value="#{o.seleccionado}" onclick="enlazarLink(#{o.id})" styleClass="check#{o.id}"/>
                                             </h:column>
                                             <h:column >
                                                 <f:facet name="header">
                                                     Documento
                                                 </f:facet>                                      
                                                 <h:commandLink  rendered="#{o.flagFirmaDigital=='Y'}"  value="#{o.nombreDocumento}" styleClass="link#{o.id} link-activo " onclick="checkarCheck(#{o.id})">
-                                                    <f:ajax onevent="validarConsultarDetalleDocumento" render="tableDocumentos :iframePdf" listener="#{MbFirma.consultarDetalleDocumento(o.idActividad)}"/>
+                                                    <f:ajax onevent="validarConsultarDetalleDocumento" render="tableDocumentos :iframePdf" listener="#{MbFirma.consultarDetalleDocumento(o.idActividad,o.flagFirmaDigital)}"/>
                                                 </h:commandLink>
                                                 <h:commandLink  rendered="#{o.flagFirmaDigital=='N'}"  value="#{o.nombreDocumento}" styleClass="link#{o.id} link-inactivo" onclick="checkarCheck(#{o.id})">
-                                                    <f:ajax onevent="validarConsultarDetalleDocumento" render="tableDocumentos :iframePdf" listener="#{MbFirma.consultarDetalleDocumento(o.idActividad)}"/>
+                                                    <f:ajax onevent="validarConsultarDetalleDocumento" render="tableDocumentos :iframePdf" listener="#{MbFirma.consultarDetalleDocumento(o.idActividad,o.flagFirmaDigital)}"/>
+                                                </h:commandLink>                                                
+                                                <h:commandLink  rendered="#{o.flagFirmaDigital=='I'}"  value="#{o.nombreDocumento}" styleClass="link#{o.id} link-inactivo" onclick="checkarCheck(#{o.id})">
+                                                    <f:ajax onevent="validarConsultarDetalleDocumento" render="tableDocumentos :iframePdf" listener="#{MbFirma.consultarDetalleDocumentoI(o.idActividad,o.flagFirmaDigital)}"/>
                                                 </h:commandLink>
                                             </h:column> 
                                             <h:column>
@@ -293,6 +306,7 @@
                                                     Estado Firma
                                                 </f:facet>
                                                 <h:outputText  rendered="#{o.flagFirmaDigital=='Y'}"  value="Por Firmar" />
+                                                <h:outputText  rendered="#{o.flagFirmaDigital=='I'}"  value="Imposible Firmar" />
                                                 <h:outputText  rendered="#{o.flagFirmaDigital=='N'}"  value="Firmado" />                                               
                                             </h:column>  
                                         </h:dataTable>
@@ -306,7 +320,7 @@
                     <div class="row">
                         <div class="col-lg-12 col-md-12 col-sm-12">
                             <h:panelGroup id="iframePdf" layout="block">
-                                <iframe class="pdf" id="iframePdf" src="#{request.contextPath}/ServletDetalleDocumentoPdf?actividad=#{idActividad}"/>
+                                <iframe class="pdf" id="iframePdf" src="#{request.contextPath}/ServletDetalleDocumentoPdf?actividad=#{idActividad}&amp;flagFirma=#{flagFirma}"/>
                             </h:panelGroup>
                         </div>
                     </div>
@@ -335,7 +349,9 @@
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <a href="#" class="btn btn-primary" onclick="$('#divApplet').show();$('#notificacionError').modal('hide')">Aceptar</a>
+                            <a href="#" class="btn btn-primary" onclick="$('#iframePdf').show();
+                                    $('#divApplet').show();
+                                    $('#notificacionError').modal('hide')">Aceptar</a>
                         </div>
                     </div>
                 </div>
@@ -363,9 +379,13 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <a href="#" class="btn btn-primary" onclick="$('#divApplet').show();$('#notificacionRollback').modal('hide');
+                        <a href="#" class="btn btn-primary" onclick="$('#iframePdf').show();
+                                $('#divApplet').show();
+                                $('#notificacionRollback').modal('hide');
                                 $('#formDocumentos\\:btnRollback').trigger('click');">Si</a>
-                        <a href="#" class="btn btn-primary" onclick="$('#divApplet').show();$('#notificacionRollback').modal('hide')">No</a>
+                        <a href="#" class="btn btn-primary" onclick="$('#iframePdf').show();
+                                $('#divApplet').show();
+                                $('#notificacionRollback').modal('hide')">No</a>
                     </div>
                 </div>
             </div>
@@ -391,7 +411,9 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <a href="#" class="btn btn-primary" onclick="$('#divApplet').show();$('#notificacionFirmados').modal('hide');
+                        <a href="#" class="btn btn-primary" onclick="$('#iframePdf').show();
+                                $('#divApplet').show();
+                                $('#notificacionFirmados').modal('hide');
                                 window.close()">Aceptar</a>
                     </div>
                 </div>
@@ -418,7 +440,9 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <a href="#" class="btn btn-primary" onclick="$('#divApplet').show();$('#notificacionErrorApplet').modal('hide');
+                        <a href="#" class="btn btn-primary" onclick="$('#iframePdf').show();
+                                $('#divApplet').show();
+                                $('#notificacionErrorApplet').modal('hide');
                                 window.close()">Aceptar</a>  
                     </div>
                 </div>
@@ -448,11 +472,18 @@
                     </div>
                     <div class="modal-footer">
                         <h:panelGroup rendered="#{not MbFirma.mostrarBotonOKErrorListar}">
-                            <a href="index.xhtml" class="btn btn-primary" onclick="$('#divApplet').show();$('#notificacionErrorListar').modal('hide');">Si</a>
-                            <a href="#" class="btn btn-primary" onclick="$('#divApplet').show();$('#notificacionErrorListar').modal('hide');closeWindow()">No</a>
+                            <a href="index.xhtml" class="btn btn-primary" onclick="$('#iframePdf').show();
+                                    $('#divApplet').show();
+                                    $('#notificacionErrorListar').modal('hide');">Si</a>
+                            <a href="#" class="btn btn-primary" onclick="$('#iframePdf').show();
+                                    $('#divApplet').show();
+                                    $('#notificacionErrorListar').modal('hide');
+                                    closeWindow()">No</a>
                         </h:panelGroup>
                         <h:panelGroup rendered="#{MbFirma.mostrarBotonOKErrorListar}">
-                            <a href="#" class="btn btn-primary" onclick="$('#divApplet').show();$('#notificacionErrorListar').modal('hide')">OK</a>
+                            <a href="#" class="btn btn-primary" onclick="$('#iframePdf').show();
+                                    $('#divApplet').show();
+                                    $('#notificacionErrorListar').modal('hide')">OK</a>
                         </h:panelGroup>
                     </div>
                 </div>
@@ -479,8 +510,13 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <a href="#" class="btn btn-primary" onclick="$('#divApplet').show();$('#notificacionErrorFirmar').modal('hide');$('#formDocumentos\\:btnFirma').trigger('click')">Si</a>
-                        <a href="#" class="btn btn-primary" onclick="$('#divApplet').show();$('#notificacionErrorFirmar').modal('hide')">No</a>
+                        <a href="#" class="btn btn-primary" onclick="$('#iframePdf').show();
+                                $('#divApplet').show();
+                                $('#notificacionErrorFirmar').modal('hide');
+                                $('#formDocumentos\\:btnFirma').trigger('click')">Si</a>
+                        <a href="#" class="btn btn-primary" onclick="$('#iframePdf').show();
+                                $('#divApplet').show();
+                                $('#notificacionErrorFirmar').modal('hide')">No</a>
                     </div>
                 </div>
             </div>
@@ -505,9 +541,13 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <a href="#" class="btn btn-primary" onclick="$('#divApplet').show();$('#notificacionErrorConsultarDetalle').modal('hide');
+                        <a href="#" class="btn btn-primary" onclick="$('#iframePdf').show();
+                                $('#divApplet').show();
+                                $('#notificacionErrorConsultarDetalle').modal('hide');
                                 clickarCheck()">Si</a>
-                        <a href="#" class="btn btn-primary" onclick="$('#divApplet').show();$('#notificacionErrorConsultarDetalle').modal('hide')">No</a>
+                        <a href="#" class="btn btn-primary" onclick="$('#iframePdf').show();
+                                $('#divApplet').show();
+                                $('#notificacionErrorConsultarDetalle').modal('hide')">No</a>
                     </div>
                 </div>
             </div>
@@ -518,16 +558,22 @@
         <script>
             $(document).ready(function () {
 
+                $('#iframePdf').show();
+                $('#divApplet').show();
+
                 if (#{MbFirma.mostrarFirmados}) {
-                    $('#divApplet').hide()
+                    $('#iframePdf').hide();
+                    $('#divApplet').hide();
                     $('#notificacionFirmados').modal('show');
                 }
                 if (#{MbFirma.mostrarErrorListar}) {
-                    $('#divApplet').hide()
+                    $('#iframePdf').hide();
+                    $('#divApplet').hide();
                     $('#notificacionErrorListar').modal('show');
                 }
                 if (#{MbFirma.mostrarErrorFirmar}) {
-                    $('#divApplet').hide()
+                    $('#iframePdf').hide();
+                    $('#divApplet').hide();
                     $('#notificacionErrorFirmar').modal('show');
                 }
             });
